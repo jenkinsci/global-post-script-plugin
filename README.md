@@ -1,0 +1,2 @@
+global-post-script-plugin
+=========================
