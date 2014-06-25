@@ -1,0 +1,7 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:section title="Global Post Script">
+        <f:entry title="Script File Name" field="script" description="Just The Script File Name, in $JENKINS_HOME/global-post-script">
+            <f:textbox name="script" value="${script}"/>
+        </f:entry>
+    </f:section>
+</j:jelly>
