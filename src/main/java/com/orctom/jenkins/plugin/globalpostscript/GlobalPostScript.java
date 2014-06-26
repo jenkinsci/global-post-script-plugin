@@ -4,16 +4,17 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -23,30 +24,32 @@ import java.io.IOException;
 public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describable<GlobalPostScript> {
 
     @Override
-    public void onCompleted(Run r, TaskListener listener) {
-        System.out.println("=============================");
-        DescriptorImpl descriptor = (DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(GlobalPostScript.class);
-        System.out.println("script: " + descriptor.getScript());
-        try {
-            EnvVars envVars = r.getEnvironment(listener);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void onCompleted(Run run, TaskListener listener) {
+        if (run.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
+            String script = getDescriptorImpl().getScript();
+            File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
+            if (file.exists()) {
+                try {
+                    EnvVars envVars = run.getEnvironment(listener);
+                    for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                        listener.getLogger().println(entry.getKey() + " = " + entry.getValue());
+                    }
+                    ScriptExecutor executor = new ScriptExecutor(envVars, listener);
+                    executor.execute(file);
+                } catch (Throwable e) {
+                    e.printStackTrace(listener.getLogger());
+                }
+            } else {
+                System.out.println("file not exist: " + file.getAbsolutePath());
+            }
         }
-    }
-
-    private String getStatus(Run r) {
-        Result result = r.getResult();
-        String status = null;
-        if (result != null) {
-            status = result.toString();
-        }
-        return status;
     }
 
     public Descriptor<GlobalPostScript> getDescriptor() {
+        return getDescriptorImpl();
+    }
+
+    public DescriptorImpl getDescriptorImpl() {
         return (DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(GlobalPostScript.class);
     }
 
@@ -60,11 +63,11 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
 
         public FormValidation doCheckName(@QueryParameter String value) throws IOException, ServletException {
-            if (value.length() == 0) {
-                return FormValidation.error("Please set a name");
+            if (StringUtils.isEmpty(value)) {
+                return FormValidation.error("Please set the script name");
             }
-            if (value.length() < 4) {
-                return FormValidation.warning("Isn't the name too short?");
+            if (!value.matches("[a-zA-Z0-9_\\-]+\\.\\w+")) {
+                return FormValidation.error("Please make sure it's a valid file name with extension. (matching '[a-zA-Z0-9_\\-]+\\.\\w+')");
             }
             return FormValidation.ok();
         }
@@ -77,7 +80,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
          * This human readable name is used in the configuration screen.
          */
         public String getDisplayName() {
-            return "Global Post Script :)";
+            return "Global Post Script";
         }
 
         @Override
