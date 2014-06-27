@@ -1,3 +1,2 @@
-print 'hello'
-if dropdeploy_targets:
-    print dropdeploy_targets
+dropdeploy_targets = '$dropdeploy_targets'
+print dropdeploy_targets
