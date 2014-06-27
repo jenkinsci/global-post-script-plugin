@@ -1,9 +1,6 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
-import groovy.lang.GroovyShell;
 import hudson.Util;
-import hudson.model.TaskListener;
-import org.codehaus.plexus.util.FileUtils;
 import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
@@ -12,49 +9,24 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleScriptContext;
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by hao on 6/25/2014.
+ * Created by hao on 6/26/2014.
  */
-public class ScriptExecutor {
+public class ScriptTest {
 
-    private Map<String, String> variables;
-    private TaskListener listener;
+    Map<String, String> variables = new HashMap<String, String>();
 
-    public ScriptExecutor(Map<String, String> variables, TaskListener listener) {
-        this.variables = variables;
-        this.listener = listener;
-    }
-
-    public void execute(File script) {
-        String ext = FileUtils.getExtension(script.getAbsolutePath());
-        if ("groovy".equalsIgnoreCase(ext) || "gvy".equalsIgnoreCase(ext) || "gs".equalsIgnoreCase(ext) || "gsh".equalsIgnoreCase(ext)) {
-            executeGroovy(script);
-        } else if ("py".equalsIgnoreCase(ext) || "jy".equalsIgnoreCase(ext)) {
-            executePython(script);
-        } else {
-            throw new UnsupportedOperationException("Script type not supported: " + ext);
-        }
-    }
-
-    public void executeGroovy(File script) {
-        System.out.println("executeGroovy");
-        try {
-            String scriptContent = getScriptContent(script);
-            GroovyShell shell = new GroovyShell();
-            for (Map.Entry<String, String> entry : variables.entrySet()) {
-                shell.setVariable(entry.getKey(), entry.getValue());
-            }
-            shell.setVariable("out", listener.getLogger());
-            shell.evaluate(scriptContent);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ScriptTest() {
+        variables = new HashMap<String, String>();
+        variables.put("dropdeploy_targets", "wwwsqs8");
     }
 
     public void executePython(File script) {
         System.out.println("executePython");
+        System.out.println("======================== 1");
         try {
             Process p = Runtime.getRuntime().exec(new String[]{"python", script.getAbsolutePath()});
             BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -65,10 +37,9 @@ public class ScriptExecutor {
                 builder.append(System.getProperty("line.separator"));
             }
             String result = builder.toString();
-            System.out.println("========================");
+            System.out.println("=");
             System.out.println(result);
         } catch (Throwable e) {
-            //e.printStackTrace(listener.getLogger());
             e.printStackTrace();
         }
 
@@ -89,7 +60,6 @@ public class ScriptExecutor {
                 System.out.println("engine null");
             }
         } catch (Throwable e) {
-            //e.printStackTrace(listener.getLogger());
             e.printStackTrace();
         }
         System.out.println("======================== 3");
@@ -124,7 +94,6 @@ public class ScriptExecutor {
         }
 
         System.out.println("======================== end");
-
     }
 
     private String getScriptContent(File script) throws IOException {
@@ -132,4 +101,9 @@ public class ScriptExecutor {
         return Util.replaceMacro(scriptContent, variables);
     }
 
+    public static void main(String[] args) {
+        File script = new File(ClassLoader.getSystemResource("test.py").getPath());
+        System.out.println("script: " + script);
+        new ScriptTest().executePython(script);
+    }
 }
