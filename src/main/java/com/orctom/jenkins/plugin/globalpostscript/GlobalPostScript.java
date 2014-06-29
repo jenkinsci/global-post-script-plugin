@@ -40,6 +40,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static class BadgeManager {
 
         private Run run;
