@@ -19,10 +19,12 @@ public class ScriptExecutor {
 
     private Map<String, String> variables;
     private TaskListener listener;
+    private GlobalPostScript.BadgeManager manager;
 
-    public ScriptExecutor(Map<String, String> variables, TaskListener listener) {
+    public ScriptExecutor(Map<String, String> variables, TaskListener listener, GlobalPostScript.BadgeManager manager) {
         this.variables = variables;
         this.listener = listener;
+        this.manager = manager;
     }
 
     public void execute(File script) {
@@ -45,6 +47,7 @@ public class ScriptExecutor {
                 shell.setVariable(entry.getKey(), entry.getValue());
             }
             shell.setVariable("out", listener.getLogger());
+            shell.setVariable("manager", manager);
             shell.evaluate(scriptContent);
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,7 +64,7 @@ public class ScriptExecutor {
                     context.setAttribute(entry.getKey(), entry.getValue(), ScriptContext.ENGINE_SCOPE);
                 }
                 context.setWriter(writer);
-                engine.eval(new FileReader(script), context);
+                engine.eval(getScriptContent(script), context);
                 listener.getLogger().println(writer.toString());
             } else {
                 executeScript("python", script);
@@ -72,9 +75,10 @@ public class ScriptExecutor {
     }
 
     public void executeScript(String executable, File script) {
+        File temp = null;
         try {
             String extension = "." + FileUtils.getExtension(script.getPath());
-            File temp = FileUtils.createTempFile("global-post-script-", extension, null);
+            temp = FileUtils.createTempFile("global-post-script-", extension, null);
             FileUtils.fileWrite(temp, getScriptContent(script));
             Process p = Runtime.getRuntime().exec(new String[]{executable, temp.getAbsolutePath()});
             BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -84,10 +88,13 @@ public class ScriptExecutor {
                 builder.append(line);
                 builder.append(System.getProperty("line.separator"));
             }
-            String result = builder.toString();
-            System.out.println(result);
+            listener.getLogger().println(builder.toString());
         } catch (Throwable e) {
             e.printStackTrace(listener.getLogger());
+        } finally {
+            if (null != temp) {
+                temp.delete();
+            }
         }
     }
 

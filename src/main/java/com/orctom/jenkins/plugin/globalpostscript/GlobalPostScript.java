@@ -14,7 +14,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -31,17 +30,30 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             if (file.exists()) {
                 try {
                     EnvVars envVars = run.getEnvironment(listener);
-                    for (Map.Entry<String, String> entry : envVars.entrySet()) {
-                        listener.getLogger().println(entry.getKey() + " = " + entry.getValue());
-                    }
-                    ScriptExecutor executor = new ScriptExecutor(envVars, listener);
+                    BadgeManager manager = new BadgeManager(run);
+                    ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
                     executor.execute(file);
                 } catch (Throwable e) {
                     e.printStackTrace(listener.getLogger());
                 }
-            } else {
-                System.out.println("file not exist: " + file.getAbsolutePath());
             }
+        }
+    }
+
+    public static class BadgeManager {
+
+        private Run run;
+
+        public BadgeManager(Run run) {
+            this.run = run;
+        }
+
+        public void addBadge(String icon, String text) {
+            run.getBadgeActions().add(GlobalPostScriptAction.createBadge(icon, text));
+        }
+
+        public void addShortText(String text) {
+            run.getBadgeActions().add(GlobalPostScriptAction.addShortText(text));
         }
     }
 
