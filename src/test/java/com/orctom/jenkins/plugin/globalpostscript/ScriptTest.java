@@ -52,7 +52,7 @@ public class ScriptTest {
                 return logger;
             }
         };
-        executor = new ScriptExecutor(variables, listener);
+        executor = new ScriptExecutor(variables, listener, null);
     }
 
     @Test

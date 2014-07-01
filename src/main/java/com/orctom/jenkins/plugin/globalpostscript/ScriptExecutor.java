@@ -34,12 +34,13 @@ public class ScriptExecutor {
         } else if ("py".equalsIgnoreCase(ext) || "jy".equalsIgnoreCase(ext)) {
             executePython(script);
         } else {
-            throw new UnsupportedOperationException("Script type not supported: " + ext);
+            listener.getLogger().println("=============================");
+            listener.getLogger().println("Script type not supported: " + ext + " | " + script);
+            listener.getLogger().println("=============================");
         }
     }
 
     public void executeGroovy(File script) {
-        System.out.println("executeGroovy");
         try {
             String scriptContent = getScriptContent(script);
             GroovyShell shell = new GroovyShell();
@@ -50,7 +51,7 @@ public class ScriptExecutor {
             shell.setVariable("manager", manager);
             shell.evaluate(scriptContent);
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(listener.getLogger());
         }
     }
 

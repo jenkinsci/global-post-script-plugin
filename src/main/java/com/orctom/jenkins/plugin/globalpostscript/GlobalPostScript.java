@@ -7,7 +7,13 @@ import hudson.model.listeners.RunListener;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.wagon.providers.http.httpclient.HttpResponse;
+import org.apache.maven.wagon.providers.http.httpclient.client.methods.HttpGet;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -30,7 +36,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             if (file.exists()) {
                 try {
                     EnvVars envVars = run.getEnvironment(listener);
-                    BadgeManager manager = new BadgeManager(run);
+                    BadgeManager manager = new BadgeManager(run, listener);
                     ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
                     executor.execute(file);
                 } catch (Throwable e) {
@@ -44,17 +50,47 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     public static class BadgeManager {
 
         private Run run;
+        private TaskListener listener;
 
-        public BadgeManager(Run run) {
+        public BadgeManager(Run run, TaskListener listener) {
             this.run = run;
+            this.listener = listener;
         }
 
         public void addBadge(String icon, String text) {
-            run.getBadgeActions().add(GlobalPostScriptAction.createBadge(icon, text));
+            run.addAction(GlobalPostScriptAction.createBadge(icon, text));
         }
 
         public void addShortText(String text) {
-            run.getBadgeActions().add(GlobalPostScriptAction.addShortText(text));
+            run.addAction(GlobalPostScriptAction.addShortText(text));
+        }
+
+        public void triggerJob(String jobName) {
+            AbstractProject job = Jenkins.getInstance().getItem(jobName, run.getParent().getParent(), AbstractProject.class);
+            if (null != job) {
+                Cause cause = new Cause.UpstreamCause(run);
+                job.scheduleBuild(cause);
+            } else {
+                listener.getLogger().println("Downstream job not found: " + jobName);
+            }
+        }
+
+        public void triggerRemoteJob(String url) {
+            HttpClient client = new HttpClient();
+            HttpMethod method = new GetMethod(url);
+            try {
+                client.executeMethod(method);
+                int statusCode = method.getStatusCode();
+                if (HttpStatus.SC_OK == statusCode) {
+                    listener.getLogger().println("Triggered: " + url);
+                } else {
+                    listener.getLogger().println("Failed to triggered: " + url + " | " + statusCode);
+                }
+            } catch (Exception e) {
+                e.printStackTrace(listener.getLogger());
+            } finally {
+                method.releaseConnection();
+            }
         }
     }
 
@@ -69,7 +105,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     @Extension
     public static final class DescriptorImpl extends Descriptor<GlobalPostScript> {
 
-        private String script = "conditional_downstream_trigger.py";
+        private String script = "downstream_job_trigger.groovy";
 
         public DescriptorImpl() {
             load();

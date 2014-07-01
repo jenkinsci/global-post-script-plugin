@@ -1,0 +1,8 @@
+<j:jelly xmlns:j="jelly:core">
+    <j:if test="${null != it.iconFileName}">
+        <img src="${rootURL}${it.iconFileName}" width="16" height="16" alt="${it.displayName}" title="${it.displayName}" />
+    </j:if>
+    <j:if test="${null == it.iconFileName}">
+        <span>${it.displayName}</span>
+    </j:if>
+</j:jelly>
