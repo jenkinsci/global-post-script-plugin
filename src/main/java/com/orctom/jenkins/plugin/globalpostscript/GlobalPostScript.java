@@ -70,6 +70,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             if (null != job) {
                 Cause cause = new Cause.UpstreamCause(run);
                 job.scheduleBuild(cause);
+                listener.getLogger().println("Triggered downstream job: " + jobName);
             } else {
                 listener.getLogger().println("Downstream job not found: " + jobName);
             }
@@ -81,7 +82,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             try {
                 client.executeMethod(method);
                 int statusCode = method.getStatusCode();
-                if (HttpStatus.SC_OK == statusCode) {
+                if (statusCode < 400) {
                     listener.getLogger().println("Triggered: " + url);
                 } else {
                     listener.getLogger().println("Failed to triggered: " + url + " | " + statusCode);
