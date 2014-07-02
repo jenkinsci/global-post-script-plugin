@@ -88,7 +88,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
                     listener.getLogger().println("Failed to triggered: " + url + " | " + statusCode);
                 }
             } catch (Exception e) {
-                e.printStackTrace(listener.getLogger());
+                listener.getLogger().println("Failed to triggered: " + url + " | " + e.getMessage());
             } finally {
                 method.releaseConnection();
             }

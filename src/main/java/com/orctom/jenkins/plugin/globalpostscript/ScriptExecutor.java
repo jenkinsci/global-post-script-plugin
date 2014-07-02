@@ -1,6 +1,7 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
 import groovy.lang.GroovyShell;
+import groovy.lang.MissingPropertyException;
 import hudson.Util;
 import hudson.model.TaskListener;
 import org.codehaus.plexus.util.FileUtils;
@@ -35,7 +36,7 @@ public class ScriptExecutor {
             executePython(script);
         } else {
             listener.getLogger().println("=============================");
-            listener.getLogger().println("Script type not supported: " + ext + " | " + script);
+            listener.getLogger().println("Script type not supported: " + ext + " | " + script.getName());
             listener.getLogger().println("=============================");
         }
     }
@@ -50,8 +51,11 @@ public class ScriptExecutor {
             shell.setVariable("out", listener.getLogger());
             shell.setVariable("manager", manager);
             shell.evaluate(scriptContent);
-        } catch (IOException e) {
-            e.printStackTrace(listener.getLogger());
+        } catch (MissingPropertyException e) {
+            listener.getLogger().println("Failed to execute: " + script.getName() + ", " + e.getMessage());
+        } catch (Throwable e) {
+            e.printStackTrace();
+            listener.getLogger().println("Failed to execute: " + script.getName() + ", " + e.getMessage());
         }
     }
 
@@ -71,7 +75,8 @@ public class ScriptExecutor {
                 executeScript("python", script);
             }
         } catch (Throwable e) {
-            e.printStackTrace(listener.getLogger());
+            e.printStackTrace();
+            listener.getLogger().println("Failed to execute: " + script.getName() + ", " + e.getMessage());
         }
     }
 
@@ -91,7 +96,8 @@ public class ScriptExecutor {
             }
             listener.getLogger().println(builder.toString());
         } catch (Throwable e) {
-            e.printStackTrace(listener.getLogger());
+            e.printStackTrace();
+            listener.getLogger().println("[global-post-script] Failed to execute: " + script.getName() + ", " + e.getMessage());
         } finally {
             if (null != temp) {
                 temp.delete();
