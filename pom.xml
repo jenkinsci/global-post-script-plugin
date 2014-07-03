@@ -12,6 +12,13 @@
 
     <name>Global Post Script Plugin</name>
 
+    <scm>
+        <url>https://github.com/orctom/global-post-script-plugin/</url>
+        <connection>scm:git:git@github.com:orctom/global-post-script-plugin.git</connection>
+        <developerConnection>scm:git:git@github.com:orctom/global-post-script-plugin.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.6</maven.compiler.source>
