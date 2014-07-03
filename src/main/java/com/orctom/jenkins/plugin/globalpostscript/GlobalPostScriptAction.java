@@ -47,6 +47,6 @@ public class GlobalPostScriptAction implements BuildBadgeAction {
 
         PluginWrapper wrapper = Hudson.getInstance().getPluginManager().getPlugin(GlobalPostScriptPlugin.class);
         boolean pluginIconExists = (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/img/" + icon).exists();
-        return pluginIconExists ? "/plugin/global-post-script-plugin/img/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
+        return pluginIconExists ? "/plugin/global-post-script/img/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
     }
 }
