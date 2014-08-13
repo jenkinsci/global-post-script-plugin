@@ -7,6 +7,8 @@ import hudson.model.listeners.RunListener;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
+import org.apache.commons.codec.StringEncoder;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -14,13 +16,16 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.wagon.providers.http.httpclient.HttpResponse;
 import org.apache.maven.wagon.providers.http.httpclient.client.methods.HttpGet;
+import org.codehaus.plexus.classworlds.UrlUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -77,7 +82,15 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             }
         }
 
-        public void triggerRemoteJob(String url) {
+        public void triggerRemoteJob(String jobUrl) {
+            String url = jobUrl;
+            try {
+                URL jobURL = new URL(jobUrl);
+                jobURL.appendToParamValue("cause", new URLCodec().encode(getCause(), "UTF-8"));
+                url = jobURL.getURL();
+            } catch (Exception e) {
+            }
+
             HttpClient client = new HttpClient();
             HttpMethod method = new GetMethod(url);
             try {
@@ -97,11 +110,28 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
         public String getCause() {
             List<Cause> causes = run.getCauses();
-            StringBuilder cause = new StringBuilder(30);
+            StringBuilder cause = new StringBuilder(50);
             for (Cause c : causes) {
-                cause.append(c.getShortDescription()).append(" ");
+                String desc = c.getShortDescription();
+                if (StringUtils.isNotEmpty(desc)) {
+                    cause.append(c.getShortDescription()).append(" ");
+                }
             }
-            System.out.println(cause.toString());
+
+            String rootUrl = Jenkins.getInstance().getRootUrl();
+            if (StringUtils.isNotEmpty(rootUrl)) {
+                cause.append(rootUrl).append(" ");
+            }
+
+            try {
+                EnvVars envVars = run.getEnvironment(listener);
+                cause.append("[")
+                        .append(envVars.get("JOB_NAME"))
+                        .append("@")
+                        .append(envVars.get("COMPUTERNAME"))
+                        .append("]");
+            } catch (Exception e) {
+            }
             return cause.toString();
         }
     }
