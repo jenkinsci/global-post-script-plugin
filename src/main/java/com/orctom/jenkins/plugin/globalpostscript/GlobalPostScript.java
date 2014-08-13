@@ -20,6 +20,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -92,6 +93,16 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
             } finally {
                 method.releaseConnection();
             }
+        }
+
+        public String getCause() {
+            List<Cause> causes = run.getCauses();
+            StringBuilder cause = new StringBuilder(30);
+            for (Cause c : causes) {
+                cause.append(c.getShortDescription()).append(" ");
+            }
+            System.out.println(cause.toString());
+            return cause.toString();
         }
     }
 
