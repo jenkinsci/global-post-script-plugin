@@ -120,18 +120,10 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
             String rootUrl = Jenkins.getInstance().getRootUrl();
             if (StringUtils.isNotEmpty(rootUrl)) {
-                cause.append(rootUrl).append(" ");
+                cause.append("on ").append(rootUrl).append(" ");
             }
 
-            try {
-                EnvVars envVars = run.getEnvironment(listener);
-                cause.append("[")
-                        .append(envVars.get("JOB_NAME"))
-                        .append("@")
-                        .append(envVars.get("COMPUTERNAME"))
-                        .append("]");
-            } catch (Exception e) {
-            }
+            cause.append("[").append(run.getParent().getName()).append("]");
             return cause.toString();
         }
     }
