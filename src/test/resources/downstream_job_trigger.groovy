@@ -39,6 +39,12 @@ def triggers = [
         },
         cpdsqp_configurator_bsd: {
             manager.triggerRemoteJob("http://ecopsci.uschecomrnd.net/buildByToken/buildWithParameters?token=8a36b668396e7aed7b4576f90bbbdc37&job=sync_cpd_content_with_sq&targets=chvbsdsqpcmb01,chvbsdsqpcmb02")
+        },
+        configurator_www_dev   : {
+            manager.triggerRemoteJob("http://ecopsci.uschecomrnd.net/buildByToken/buildWithParameters?token=8a36b668396e7aed7b4576f90bbbdc37&job=sync_ag2content_to_dev&targets=chvwwwdevcmb01,chvwwwdevcmb02")
+        },
+        configurator_bsd_dev   : {
+            manager.triggerRemoteJob("http://ecopsci.uschecomrnd.net/buildByToken/buildWithParameters?token=8a36b668396e7aed7b4576f90bbbdc37&job=sync_ag2content_to_dev&targets=chvbsddevcmb01,chvbsddevcmb02")
         }
 ]
 
