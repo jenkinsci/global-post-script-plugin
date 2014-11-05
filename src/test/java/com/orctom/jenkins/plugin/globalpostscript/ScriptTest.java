@@ -52,15 +52,52 @@ public class ScriptTest {
                 return logger;
             }
         };
-        executor = new ScriptExecutor(variables, listener, null);
+        executor = new ScriptExecutor(variables, listener, new GlobalPostScript.BadgeManager(null, null) {
+            @Override
+            public void addBadge(String icon, String text) {
+                System.out.println("addBadge: " + icon + ", " + text);
+            }
+
+            @Override
+            public void addShortText(String text) {
+                System.out.println("addShortText: " + text);
+            }
+
+            @Override
+            public void triggerJob(String jobName) {
+                System.out.println("triggerJob: " + jobName);
+            }
+
+            @Override
+            public void triggerRemoteJob(String jobUrl) {
+                System.out.println("triggerRemoteJob: " + jobUrl);
+            }
+
+            @Override
+            public String getCause() {
+                return "dummy cause";
+            }
+        });
     }
 
     @Test
     public void testExecutePython() {
         File script = new File(ClassLoader.getSystemResource("test.py").getPath());
         System.out.println("script: " + script);
-        String expected = "dropdeploy to: server1";
+        String expected = "dropdeploy to: server1, dummy cause";
         executor.executePython(script);
+        String actual = StringUtils.trim(listener.getLogger().toString());
+        System.out.println("expected: " + expected);
+        System.out.println("actual  : " + actual);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testExecuteJython() {
+        File script = new File(ClassLoader.getSystemResource("test2.py").getPath());
+        System.out.println("script: " + script);
+        String expected = "dropdeploy to: server1, dummy cause";
+        executor.executeJython(script);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);
