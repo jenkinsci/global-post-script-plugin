@@ -1,3 +1,6 @@
+# Deprecated
+This project has been moved to [jenkinsci/global-post-script-plugin!](https://github.com/jenkinsci/global-post-script-plugin)
+
 # global-post-script-plugin
 
 Execute a global configured groovy/python script after each build of each job managed by the Jenkins
