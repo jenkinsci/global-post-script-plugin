@@ -5,7 +5,6 @@ import groovy.lang.MissingPropertyException;
 import hudson.Util;
 import hudson.model.TaskListener;
 import org.codehaus.plexus.util.FileUtils;
-import org.python.util.PythonInterpreter;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -35,6 +34,10 @@ public class ScriptExecutor {
             executeGroovy(script);
         } else if ("py".equalsIgnoreCase(ext) || "jy".equalsIgnoreCase(ext)) {
             executePython(script);
+        } else if ("sh".equalsIgnoreCase(ext)) {
+            executeScript("sh", script);
+        } else if ("bat".equalsIgnoreCase(ext)) {
+            executeScript("bat", script);
         } else {
             listener.getLogger().println("=============================");
             listener.getLogger().println("Script type not supported: " + ext + " | " + script.getName());
@@ -74,27 +77,9 @@ public class ScriptExecutor {
                 engine.eval(getScriptContent(script), context);
                 listener.getLogger().println(writer.toString());
             } else {
-                executeScript("python", script);
+                listener.getLogger().println("[ERROR] must something wrong within this plugin, please use Grovvy script in the meanwhile");
             }
         } catch (Throwable e) {
-            e.printStackTrace();
-            listener.getLogger().println("Failed to execute: " + script.getName() + ", " + e.getMessage());
-        }
-    }
-
-    public void executeJython(File script) {
-        try {
-            PythonInterpreter pi = new PythonInterpreter();
-            StringWriter writer = new StringWriter();
-            for (Map.Entry<String, String> entry : variables.entrySet()) {
-                pi.set(entry.getKey(), entry.getValue());
-            }
-            pi.set("manager", manager);
-            pi.setOut(writer);
-            pi.setErr(writer);
-            pi.execfile(script.getAbsolutePath());
-            listener.getLogger().println(writer.toString());
-        } catch (Exception e) {
             e.printStackTrace();
             listener.getLogger().println("Failed to execute: " + script.getName() + ", " + e.getMessage());
         }

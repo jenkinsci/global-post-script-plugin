@@ -2,6 +2,7 @@
 Execute a global configured groovy/python script after each build of each job managed by the Jenkins
 
 ## Variables that could be used in the script file
+### Jenkins Built-in Variables
 | Variable | Description | Sample Data |
 | -------- | ----------- | ------ |
 | BUILD_ID | Build timestamp as ID | 2014-06-26_07-16-51 |
@@ -22,11 +23,6 @@ Execute a global configured groovy/python script after each build of each job ma
 ### Extra variables
 Parameters of `parameterized build` or parameters been passed in by `-Dparameter_name=parameter_value` are also available
 
-## Groovy Script
-Variables can be used in two ways:
- * `$variable` quoted as string, will be replaced by avaialbe variable's value, will keep not changed if no variable matches.
- * groovy variables
-
 ### `manager`
 An extra object is available as groovy variables: `manager`, provided 4 methods:
 
@@ -37,13 +33,26 @@ An extra object is available as groovy variables: `manager`, provided 4 methods:
 | `triggerJob(String jobName)` | Trigger a job managed by the same Jenkins |
 | `triggerRemoteJob(String url)` | Trigger a job by URL |
 
-### Extra variables
-Should be checked if available before use, by 
+## Supported Scripts
+### Groovy
+Sample:
 ```groovy
-binding.variables.containsKey("variable_name")
+out.println("dropdeploy to: $dropdeploy_targets")
 ```
 
-### Sample
+Sample:
+```groovy
+out.println("dropdeploy to: " + dropdeploy_targets)
+```
+
+Sample:
+```groovy
+if (binding.variables.containsKey("variable_name")) {
+    ...
+}
+```
+
+Sample:
 ```groovy
 def triggers = [
         wwwsqs8: {
@@ -94,11 +103,27 @@ if (binding.variables.containsKey("dropdeploy") && binding.variables.containsKey
 }
 ```
 
-## Python Script
-Variables only can be used as `$variable` as string, will be replaced by avaialbe variable's value, will keep not changed if no variable matches.
-
-### Sample
+### Python (Jython)
+Sample:
 ```python
-dropdeploy_targets = '$dropdeploy_targets'
-print 'dropdeploy to: ' + dropdeploy_targets
+print 'dropdeploy to: ' + dropdeploy_targets + ", " +  manager.getCause()
 ```
+
+Sample:
+```python
+if 'variable_name' in locals():
+    ...
+```
+
+Sample:
+```python
+str = 'dropdeploy to: '
+if 'dropdeploy_targets' in locals():
+    str += dropdeploy_targets
+if 'manager' in locals():
+    str += ", " + manager.getCause()
+print str
+```
+
+### bat/sh
+**NO** variables will passed into the script

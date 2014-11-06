@@ -93,11 +93,11 @@ public class ScriptTest {
     }
 
     @Test
-    public void testExecuteJython() {
+    public void testExecutePython2() {
         File script = new File(ClassLoader.getSystemResource("test2.py").getPath());
         System.out.println("script: " + script);
         String expected = "dropdeploy to: server1, dummy cause";
-        executor.executeJython(script);
+        executor.executePython(script);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);
