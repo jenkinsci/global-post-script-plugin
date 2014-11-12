@@ -6,7 +6,7 @@
         <version>1.565.3</version>
     </parent>
     <artifactId>global-post-script</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
     <url>http://wiki.jenkins-ci.org/display/JENKINS/Globa+Post+Script+Plugin</url>
@@ -32,13 +32,6 @@
             <email>orctom@gmail.com</email>
         </developer>
     </developers>
-
-    <distributionManagement>
-        <repository>
-            <id>maven.jenkins-ci.org</id>
-            <url>http://maven.jenkins-ci.org:8081/content/repositories/releases/</url>
-        </repository>
-    </distributionManagement>
 
     <repositories>
         <repository>
