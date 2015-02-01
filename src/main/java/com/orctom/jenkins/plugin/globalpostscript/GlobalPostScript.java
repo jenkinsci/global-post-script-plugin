@@ -50,10 +50,37 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
         private Run run;
         private TaskListener listener;
+        private EnvVars envVars;
 
         public BadgeManager(Run run, TaskListener listener) {
             this.run = run;
             this.listener = listener;
+
+            if (null != run) {
+                try {
+                    envVars = run.getEnvironment(listener);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public boolean isVar(String name) {
+            if (null == envVars || StringUtils.isBlank(name)) {
+                return false;
+            }
+
+            return envVars.containsKey(name);
+        }
+
+        public boolean isNotBlankVar(String name) {
+            if (null == envVars || StringUtils.isBlank(name)) {
+                return false;
+            }
+
+            return StringUtils.isNotBlank(envVars.get(name));
         }
 
         public void addBadge(String icon, String text) {

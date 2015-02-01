@@ -16,9 +16,9 @@ Execute a global configured groovy/python script after each build of each job ma
 | MAVEN_CMD_LINE_ARGS | Maven command args | clean install |
 | NODE_LABELS | Lables of the nodes where the build could be executed | master |
 | NODE_NAME | Name of the node where the build executed | master |
-| SVN_REVISION | SVN revision | 185214 |
+| SVN_REVISION | SVN redeploy_targets?.trivision | 185214 |
 | SVN_URL | SVN URL |  |
-| WORKSPACE | The path of the workspace | ~/workspace-idea/global-post-script-plugin/work/workspace/LOGANALYZE |
+| WORKSPACE | The path of the workspace | deploy_targets?.tri~/workspace-idea/global-post-script-plugin/work/workspace/LOGANALYZE |
 
 ### Extra variables
 Parameters of `parameterized build` or parameters been passed in by `-Dparameter_name=parameter_value` are also available
@@ -28,6 +28,8 @@ An extra object is available as groovy variables: `manager`, provided 4 methods:
 
 | Method | Description |
 | -------- | ----------- |
+| `isVar(String name)` | Check if a variable is defined and usable in the script |
+| `isNotBlankVar(String name)` | Check if a variable is defined and usable in the script, and with a non-blank value |
 | `addBadge(String icon, String text)` | Add a badge to the build |
 | `addShortText(String text)` | Add a text label to the build |
 | `triggerJob(String jobName)` | Trigger a job managed by the same Jenkins |
@@ -37,12 +39,12 @@ An extra object is available as groovy variables: `manager`, provided 4 methods:
 ### Groovy
 Sample:
 ```groovy
-out.println("dropdeploy to: $dropdeploy_targets")
+out.println("deploy to: $deploy_targets")
 ```
 
 Sample:
 ```groovy
-out.println("dropdeploy to: " + dropdeploy_targets)
+out.println("deploy to: " + deploy_targets)
 ```
 
 Sample:
@@ -83,14 +85,9 @@ def triggers = [
         }
 ]
 
-if (binding.variables.containsKey("deploy") && binding.variables.containsKey("deploy_targets") &&
-        "true" == deploy && deploy_targets?.trim()) {
-    manager.addBadge("computer.png", "[DEV: " + deploy_targets + "]")
-}
-if (binding.variables.containsKey("dropdeploy") && binding.variables.containsKey("dropdeploy_targets") &&
-        "true" == dropdeploy && dropdeploy_targets?.trim()) {
+if (manager.isVar("deploy") && manager.isNotBlankVar("deploy_targets") && "true" == deploy) {
     dropped = false
-    dropdeploy_targets.split(',').each {
+    deploy_targets.split(',').each {
         trigger = triggers[it]
         if (trigger) {
             trigger()
@@ -98,7 +95,7 @@ if (binding.variables.containsKey("dropdeploy") && binding.variables.containsKey
         }
     }
     if (dropped) {
-        manager.addBadge("server.png", "[SQ: " + dropdeploy_targets + "]")
+        manager.addBadge("server.png", "[SQ: " + deploy_targets + "]")
     }
 }
 ```
@@ -106,7 +103,7 @@ if (binding.variables.containsKey("dropdeploy") && binding.variables.containsKey
 ### Python (Jython)
 Sample:
 ```python
-print 'dropdeploy to: ' + dropdeploy_targets + ", " +  manager.getCause()
+print 'deploy to: ' + deploy_targets + ", " +  manager.getCause()
 ```
 
 Sample:
@@ -117,11 +114,10 @@ if 'variable_name' in locals():
 
 Sample:
 ```python
-str = 'dropdeploy to: '
-if 'dropdeploy_targets' in locals():
-    str += dropdeploy_targets
-if 'manager' in locals():
-    str += ", " + manager.getCause()
+str = 'deploy to: '
+if manager.isVar('deploy_targets'):
+    str += deploy_targets
+str += ", " + manager.getCause()
 print str
 ```
 

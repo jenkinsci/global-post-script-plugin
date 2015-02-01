@@ -64,8 +64,11 @@ public class ScriptExecutor {
     }
 
     public void executePython(File script) {
+        ScriptEngineManager sem = null;
+        ScriptEngine engine = null;
         try {
-            ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("py");
+            sem = new ScriptEngineManager(this.getClass().getClassLoader());
+            engine = sem.getEngineByExtension("py");
             if (null != engine) {
                 ScriptContext context = new SimpleScriptContext();
                 StringWriter writer = new StringWriter();
@@ -77,7 +80,7 @@ public class ScriptExecutor {
                 engine.eval(getScriptContent(script), context);
                 listener.getLogger().println(writer.toString());
             } else {
-                listener.getLogger().println("[ERROR] must something wrong within this plugin, please use Grovvy script in the meanwhile");
+                listener.getLogger().println("[ERROR] Failed to load python interpreter, please use Grovvy script in the meanwhile");
             }
         } catch (Throwable e) {
             e.printStackTrace();
