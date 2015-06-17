@@ -1,9 +1,11 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
+import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
+import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -14,11 +16,13 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -92,11 +96,33 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
 
         public void triggerJob(String jobName) {
+            LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+            triggerJob(jobName, params);
+        }
+
+        public void triggerJob(String jobName, LinkedHashMap<String, String> params)  {
+            List<ParameterValue> newParams = Lists.newArrayList();
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                newParams.add(new StringParameterValue(entry.getKey(), entry.getValue()));
+            }
             AbstractProject job = Jenkins.getInstance().getItem(jobName, run.getParent().getParent(), AbstractProject.class);
             if (null != job) {
                 Cause cause = new Cause.UpstreamCause(run);
-                job.scheduleBuild(cause);
-                listener.getLogger().println("Triggered downstream job: " + jobName);
+                QueueTaskFuture<FreeStyleBuild> future = job.scheduleBuild2(0, cause, new ParametersAction(newParams));
+                if (future != null) {
+                    try {
+                        FreeStyleBuild execution = future.get();
+                        listener.getLogger().println("Triggered downstream job: "
+                                + jobName + " #" + execution.getNumber() + ": "
+                                + execution.getProject().getAbsoluteUrl() + execution.getNumber());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    listener.getLogger().println("Triggered downstream job: " + jobName);
+                }
             } else {
                 listener.getLogger().println("Downstream job not found: " + jobName);
             }

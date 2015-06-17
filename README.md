@@ -33,6 +33,7 @@ An extra object is available as groovy variables: `manager`, provided 4 methods:
 | `addBadge(String icon, String text)` | Add a badge to the build |
 | `addShortText(String text)` | Add a text label to the build |
 | `triggerJob(String jobName)` | Trigger a job managed by the same Jenkins |
+| `triggerJob(String jobName, HashMap params)` | Trigger a job managed by the same Jenkins with parameters|
 | `triggerRemoteJob(String url)` | Trigger a job by URL |
 
 ## Supported Scripts
@@ -58,7 +59,11 @@ Sample:
 ```groovy
 def triggers = [
         wwwsqs8: {
-            manager.triggerJob("WWW_JBEHAVE_TEST")
+            def params = [
+                PARENT_BUILD_NUMBER: '$BUILD_NUMBER',
+                PARENT_JOB_NAME: '$JOB_NAME',
+            ]
+            manager.triggerJob("WWW_JBEHAVE_TEST", params)
             manager.triggerJob("WWW_MOBILE_API_TEST")
             manager.triggerRemoteJob("http://localhost/job/Dev_Launch_WWW_SQS_REGRESSION/build?token=88e4b5fd1d28949710a9c4924775ce40&delay=1800sec")
         },
