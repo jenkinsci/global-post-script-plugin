@@ -62,6 +62,7 @@ def triggers = [
             def params = [
                 PARENT_BUILD_NUMBER: '$BUILD_NUMBER',
                 PARENT_JOB_NAME: '$JOB_NAME',
+                any_param_name: '$deploy_targets'
             ]
             manager.triggerJob("WWW_JBEHAVE_TEST", params)
             manager.triggerJob("WWW_MOBILE_API_TEST")
