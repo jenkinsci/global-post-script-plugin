@@ -33,7 +33,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
 	@Override
 	public void onCompleted(Run run, TaskListener listener) {
-		if (run.getResult().isBetterOrEqualTo(getDescriptorImpl().getRunConditionn())) {
+		if (run.getResult().isBetterOrEqualTo(getDescriptorImpl().getResultCondition())) {
 			String script = getDescriptorImpl().getScript();
 			File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
 			if (file.exists()) {
@@ -115,13 +115,13 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 							job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
 							"#" + job.getNextBuildNumber());
 					if (scheduled) {
-						listener.getLogger().println(hudson.tasks.Messages.BuildTrigger_Triggering(name));
+						println(hudson.tasks.Messages.BuildTrigger_Triggering(name));
 					} else {
-						listener.getLogger().println(hudson.tasks.Messages.BuildTrigger_InQueue(name));
+						println(hudson.tasks.Messages.BuildTrigger_InQueue(name));
 					}
 				}
 			} else {
-				listener.getLogger().println("Downstream job not found: " + jobName);
+				println("Downstream job not found: " + jobName);
 			}
 		}
 
@@ -140,12 +140,12 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 				client.executeMethod(method);
 				int statusCode = method.getStatusCode();
 				if (statusCode < 400) {
-					listener.getLogger().println("Triggered: " + url);
+					println("Triggered: " + url);
 				} else {
-					listener.getLogger().println("Failed to triggered: " + url + " | " + statusCode);
+					println("Failed to triggered: " + url + " | " + statusCode);
 				}
 			} catch (Exception e) {
-				listener.getLogger().println("Failed to triggered: " + url + " | " + e.getMessage());
+				println("Failed to triggered: " + url + " | " + e.getMessage());
 			} finally {
 				method.releaseConnection();
 			}
@@ -169,6 +169,10 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			cause.append("[").append(run.getParent().getName()).append("]");
 			return cause.toString();
 		}
+
+		public void println(String message) {
+			listener.getLogger().println("[" + GlobalPostScriptPlugin.PLUGIN_NAME + "]: " + message);
+		}
 	}
 
 	public Descriptor<GlobalPostScript> getDescriptor() {
@@ -183,7 +187,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 	public static final class DescriptorImpl extends Descriptor<GlobalPostScript> {
 
 		private String script = "downstream_job_trigger.groovy";
-		private Result runConditionn = Result.UNSTABLE;
+		private Result runCondition = Result.UNSTABLE;
 
 		public DescriptorImpl() {
 			load();
@@ -207,13 +211,13 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		 * This human readable name is used in the configuration screen.
 		 */
 		public String getDisplayName() {
-			return "Global Post Script";
+			return GlobalPostScriptPlugin.PLUGIN_NAME;
 		}
 
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject formData) throws Descriptor.FormException {
 			script = formData.getString("script");
-			runConditionn = Result.fromString(formData.getString("runCondition"));
+			runCondition = Result.fromString(formData.getString("runCondition"));
 			save();
 			return super.configure(req, formData);
 		}
@@ -222,8 +226,12 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			return script;
 		}
 
-		public Result getRunConditionn() {
-			return runConditionn;
+		public Result getResultCondition() {
+			return runCondition;
+		}
+
+		public String getRunCondition() {
+			return runCondition.toString();
 		}
 	}
 }

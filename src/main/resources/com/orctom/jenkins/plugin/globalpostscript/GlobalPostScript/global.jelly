@@ -3,11 +3,11 @@
         <f:entry title="Script File Name" field="script" description="Just The Script File Name, in $JENKINS_HOME/global-post-script">
             <f:textbox name="script" value="${script}"/>
         </f:entry>
-        <f:entry title="Run when" field="runCondition">
+        <f:entry title="Run when">
             <select name="runCondition">
-                <option value="SUCCESS">Only if build is stable</option>
-                <option value="UNSTABLE" selected="true">Even if the build is unstable</option>
-                <option value="FAILURE">Even if the build fails</option>
+                <f:option value="SUCCESS" selected="${'SUCCESS' == instance.runCondition}">Only if build is stable</f:option>
+                <f:option value="UNSTABLE" selected="${'UNSTABLE' == instance.runCondition}">Even if the build is unstable</f:option>
+                <f:option value="FAILURE" selected="${'FAILURE' == instance.runCondition}">Even if the build fails</f:option>
             </select>
         </f:entry>
     </f:section>
