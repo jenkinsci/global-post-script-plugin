@@ -41,6 +41,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			if (file.exists()) {
 				try {
 					EnvVars envVars = run.getEnvironment(listener);
+                    envVars.put("BUILD_RESULT", run.getResult().toString());
 					BadgeManager manager = new BadgeManager(run, listener);
 					ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
 					executor.execute(file);

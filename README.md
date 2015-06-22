@@ -7,6 +7,7 @@ Execute a global configured groovy/python script after each build of each job ma
 | -------- | ----------- | ------ |
 | BUILD_ID | Build timestamp as ID | 2014-06-26_07-16-51 |
 | BUILD_NUMBER | Build No# | 16 |
+| BUILD_RESULT | Build result | SUCCESS |
 | BUILD_TAG | Job Name + Build No# | jenkins-test-job-16 |
 | BUILD_URL | The URL of this build | http://localhost:8080/job/test-job/16/ |
 | JENKINS_HOME | The path of the root folder of Jenkins | ~/workspace-idea/global-post-script-plugin/./work |
