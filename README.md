@@ -1,13 +1,15 @@
 # global-post-script-plugin [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/global-post-script-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/global-post-script-plugin/)
 Execute a global configured groovy/python script after each build of each job managed by the Jenkins
 
+See also: https://wiki.jenkins-ci.org/display/JENKINS/Global+Post+Script+Plugin
+
 ## Variables that could be used in the script file
 ### Jenkins Built-in Variables
 | Variable | Description | Sample Data |
 | -------- | ----------- | ------ |
 | BUILD_ID | Build timestamp as ID | 2014-06-26_07-16-51 |
 | BUILD_NUMBER | Build No# | 16 |
-| BUILD_RESULT | Build result | SUCCESS |
+| BUILD_RESULT | Build result | SUCCESS / UNSTABLE / FAILURE ... |
 | BUILD_TAG | Job Name + Build No# | jenkins-test-job-16 |
 | BUILD_URL | The URL of this build | http://localhost:8080/job/test-job/16/ |
 | JENKINS_HOME | The path of the root folder of Jenkins | ~/workspace-idea/global-post-script-plugin/./work |
