@@ -35,12 +35,13 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
 	@Override
 	public void onCompleted(Run run, TaskListener listener) {
-		if (run.getResult().isBetterOrEqualTo(Result.UNSTABLE)) {
+		if (run.getResult().isBetterOrEqualTo(Result.UNSTABLE) || getDescriptorImpl().getRunForAll()) {
 			String script = getDescriptorImpl().getScript();
 			File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
 			if (file.exists()) {
 				try {
 					EnvVars envVars = run.getEnvironment(listener);
+                    envVars.put("BUILD_RESULT", run.getResult().toString());
 					BadgeManager manager = new BadgeManager(run, listener);
 					ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
 					executor.execute(file);
@@ -184,6 +185,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 	public static final class DescriptorImpl extends Descriptor<GlobalPostScript> {
 
 		private String script = "downstream_job_trigger.groovy";
+        private Boolean runForAll = false;
 
 		public DescriptorImpl() {
 			load();
@@ -213,6 +215,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject formData) throws Descriptor.FormException {
 			script = formData.getString("script");
+            runForAll = formData.getBoolean("runForAll");
 			save();
 			return super.configure(req, formData);
 		}
@@ -220,5 +223,9 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		public String getScript() {
 			return script;
 		}
+
+        public Boolean getRunForAll() {
+            return runForAll;
+        }
 	}
 }
