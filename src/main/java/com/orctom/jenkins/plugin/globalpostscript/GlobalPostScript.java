@@ -6,7 +6,6 @@ import hudson.Extension;
 import hudson.console.ModelHyperlinkNote;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
-import hudson.model.queue.QueueTaskFuture;
 import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
 
 /**
  * Global Post Script that will be executed for all jobs
@@ -35,13 +33,13 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
 	@Override
 	public void onCompleted(Run run, TaskListener listener) {
-		if (run.getResult().isBetterOrEqualTo(Result.UNSTABLE) || getDescriptorImpl().getRunForAll()) {
+		if (run.getResult().isBetterOrEqualTo(getDescriptorImpl().getRunConditionn())) {
 			String script = getDescriptorImpl().getScript();
 			File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
 			if (file.exists()) {
 				try {
 					EnvVars envVars = run.getEnvironment(listener);
-                    envVars.put("BUILD_RESULT", run.getResult().toString());
+					envVars.put("BUILD_RESULT", run.getResult().toString());
 					BadgeManager manager = new BadgeManager(run, listener);
 					ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
 					executor.execute(file);
@@ -114,8 +112,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 				if (Jenkins.getInstance().getItemByFullName(job.getFullName()) == job) {
 					String name = ModelHyperlinkNote.encodeTo(job) + "  "
 							+ ModelHyperlinkNote.encodeTo(
-								job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
-								"#" + job.getNextBuildNumber());
+							job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
+							"#" + job.getNextBuildNumber());
 					if (scheduled) {
 						listener.getLogger().println(hudson.tasks.Messages.BuildTrigger_Triggering(name));
 					} else {
@@ -185,7 +183,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 	public static final class DescriptorImpl extends Descriptor<GlobalPostScript> {
 
 		private String script = "downstream_job_trigger.groovy";
-        private Boolean runForAll = false;
+		private Result runConditionn = Result.UNSTABLE;
 
 		public DescriptorImpl() {
 			load();
@@ -215,7 +213,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject formData) throws Descriptor.FormException {
 			script = formData.getString("script");
-            runForAll = formData.getBoolean("runForAll");
+			runConditionn = Result.fromString(formData.getString("runCondition"));
 			save();
 			return super.configure(req, formData);
 		}
@@ -224,8 +222,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			return script;
 		}
 
-        public Boolean getRunForAll() {
-            return runForAll;
-        }
+		public Result getRunConditionn() {
+			return runConditionn;
+		}
 	}
 }

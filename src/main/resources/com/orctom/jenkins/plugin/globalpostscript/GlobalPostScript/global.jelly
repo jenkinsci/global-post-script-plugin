@@ -3,8 +3,12 @@
         <f:entry title="Script File Name" field="script" description="Just The Script File Name, in $JENKINS_HOME/global-post-script">
             <f:textbox name="script" value="${script}"/>
         </f:entry>
-        <f:entry title="Run for all builds" field="runForAll" description="If not checked, script will run only for UNSTABLE or better">
-            <f:checkbox name="runForAll" value="${runForAll}"/>
+        <f:entry title="Run when" field="runCondition">
+            <select name="runCondition">
+                <option value="SUCCESS">Only if build is stable</option>
+                <option value="UNSTABLE" selected="true">Even if the build is unstable</option>
+                <option value="FAILURE">Even if the build fails</option>
+            </select>
         </f:entry>
     </f:section>
 </j:jelly>
