@@ -176,8 +176,12 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		}
 	}
 
-	private static String getRemoteJobUrl(String jobUrl) {
-		return jobUrl.substring(0, jobUrl.lastIndexOf("/") + 1);
+	public static String getRemoteJobUrl(String jobUrl) {
+		if (jobUrl.contains("buildByToken")) {
+			return jobUrl.substring(0, jobUrl.indexOf("buildByToken")) + "job/" + jobUrl.replaceFirst(".*job=(\\w+)&.*", "$1");
+		} else {
+			return jobUrl.substring(0, jobUrl.lastIndexOf("/") + 1);
+		}
 	}
 
 	public Descriptor<GlobalPostScript> getDescriptor() {
