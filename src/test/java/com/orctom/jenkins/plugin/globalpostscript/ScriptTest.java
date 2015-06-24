@@ -69,8 +69,8 @@ public class ScriptTest {
             }
 
             @Override
-            public void triggerRemoteJob(String jobUrl) {
-                System.out.println("triggerRemoteJob: " + jobUrl);
+            public void triggerRemoteJob(String jobTriggerUrl) {
+                System.out.println("triggerRemoteJob: " + jobTriggerUrl);
             }
 
             @Override

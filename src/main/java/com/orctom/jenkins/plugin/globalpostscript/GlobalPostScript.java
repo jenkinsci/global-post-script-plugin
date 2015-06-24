@@ -125,10 +125,11 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			}
 		}
 
-		public void triggerRemoteJob(String jobUrl) {
-			String url = jobUrl;
+		public void triggerRemoteJob(String jobTriggerUrl) {
+			String url = jobTriggerUrl;
+			String jobUrl = getRemoteJobUrl(jobTriggerUrl);
 			try {
-				URL jobURL = new URL(jobUrl);
+				URL jobURL = new URL(jobTriggerUrl);
 				jobURL.appendToParamValue("cause", new URLCodec().encode(getCause(), "UTF-8"));
 				url = jobURL.getURL();
 			} catch (Exception e) {
@@ -140,12 +141,12 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 				client.executeMethod(method);
 				int statusCode = method.getStatusCode();
 				if (statusCode < 400) {
-					println("Triggered: " + url);
+					println("Triggered: " + jobUrl);
 				} else {
-					println("Failed to triggered: " + url + " | " + statusCode);
+					println("Failed to triggered: " + jobUrl + " | " + statusCode);
 				}
 			} catch (Exception e) {
-				println("Failed to triggered: " + url + " | " + e.getMessage());
+				println("Failed to triggered: " + jobUrl + " | " + e.getMessage());
 			} finally {
 				method.releaseConnection();
 			}
@@ -173,6 +174,10 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		public void println(String message) {
 			listener.getLogger().println("[" + GlobalPostScriptPlugin.PLUGIN_NAME + "]: " + message);
 		}
+	}
+
+	private static String getRemoteJobUrl(String jobUrl) {
+		return jobUrl.substring(0, jobUrl.lastIndexOf("/") + 1);
 	}
 
 	public Descriptor<GlobalPostScript> getDescriptor() {
