@@ -33,20 +33,38 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 
 	@Override
 	public void onCompleted(Run run, TaskListener listener) {
-		if (run.getResult().isBetterOrEqualTo(getDescriptorImpl().getResultCondition())) {
-			String script = getDescriptorImpl().getScript();
-			File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
-			if (file.exists()) {
-				try {
-					EnvVars envVars = run.getEnvironment(listener);
-					envVars.put("BUILD_RESULT", run.getResult().toString());
-					BadgeManager manager = new BadgeManager(run, listener);
-					ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
-					executor.execute(file);
-				} catch (Throwable e) {
-					e.printStackTrace(listener.getLogger());
-				}
+		EnvVars envVars = getEnvVars(run, listener);
+
+		// This method also get executed for each sub-module in multi-module Maven project.
+		if (null == envVars || !envVars.containsKey("EXECUTOR_NUMBER")) {
+			return;
+		}
+
+		if (run.getResult().isWorseThan(getDescriptorImpl().getResultCondition())) {
+			return;
+		}
+
+		String script = getDescriptorImpl().getScript();
+		File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
+		if (file.exists()) {
+			try {
+				BadgeManager manager = new BadgeManager(run, listener);
+				ScriptExecutor executor = new ScriptExecutor(envVars, listener, manager);
+				executor.execute(file);
+			} catch (Throwable e) {
+				e.printStackTrace(listener.getLogger());
 			}
+		}
+	}
+
+	private EnvVars getEnvVars(Run run, TaskListener listener) {
+		try {
+			EnvVars envVars = run.getEnvironment(listener);
+			envVars.put("BUILD_RESULT", run.getResult().toString());
+			return envVars;
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -121,13 +139,14 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 					}
 				}
 			} else {
-				println("Downstream job not found: " + jobName);
+				println("[ERROR] Downstream job not found: " + jobName);
 			}
 		}
 
 		public void triggerRemoteJob(String jobTriggerUrl) {
 			String url = jobTriggerUrl;
 			String jobUrl = getRemoteJobUrl(jobTriggerUrl);
+
 			try {
 				URL jobURL = new URL(jobTriggerUrl);
 				jobURL.appendToParamValue("cause", new URLCodec().encode(getCause(), "UTF-8"));
@@ -141,12 +160,13 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 				client.executeMethod(method);
 				int statusCode = method.getStatusCode();
 				if (statusCode < 400) {
-					println("Triggered: " + jobUrl);
+					println(hudson.tasks.Messages.BuildTrigger_Triggering(jobUrl));
 				} else {
-					println("Failed to triggered: " + jobUrl + " | " + statusCode);
+					println("[ERROR] Failed to trigger: " + jobUrl + " | " + statusCode);
 				}
 			} catch (Exception e) {
-				println("Failed to triggered: " + jobUrl + " | " + e.getMessage());
+				e.printStackTrace();
+				println("[ERROR] Failed to trigger: " + jobUrl + " | " + e.getMessage());
 			} finally {
 				method.releaseConnection();
 			}
@@ -171,8 +191,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			return cause.toString();
 		}
 
-		public void println(String message) {
-			listener.getLogger().println("[" + GlobalPostScriptPlugin.PLUGIN_NAME + "]: " + message);
+		private void println(String message) {
+			listener.getLogger().println(message);
 		}
 	}
 
