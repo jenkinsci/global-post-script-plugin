@@ -49,7 +49,7 @@ public class ScriptExecutor {
     public void executeGroovy(File script) {
         try {
             String scriptContent = getScriptContent(script);
-            GroovyShell shell = new GroovyShell(Jenkins.getInstance().getPluginManager().uberClassLoader);
+            GroovyShell shell = new GroovyShell(getParentClassloader());
             for (Map.Entry<String, String> entry : variables.entrySet()) {
                 shell.setVariable(entry.getKey(), entry.getValue());
             }
@@ -68,7 +68,7 @@ public class ScriptExecutor {
         ScriptEngineManager sem = null;
         ScriptEngine engine = null;
         try {
-            sem = new ScriptEngineManager(Jenkins.getInstance().getPluginManager().uberClassLoader);
+            sem = new ScriptEngineManager(getParentClassloader());
             engine = sem.getEngineByExtension("py");
             if (null != engine) {
                 ScriptContext context = new SimpleScriptContext();
@@ -117,6 +117,14 @@ public class ScriptExecutor {
     private String getScriptContent(File script) throws IOException {
         String scriptContent = Util.loadFile(script);
         return Util.replaceMacro(scriptContent, variables);
+    }
+
+    private ClassLoader getParentClassloader() {
+        if (null != Jenkins.getInstance()) {
+            return Jenkins.getInstance().getPluginManager().uberClassLoader;
+        } else {
+            return this.getClass().getClassLoader();
+        }
     }
 
 }
