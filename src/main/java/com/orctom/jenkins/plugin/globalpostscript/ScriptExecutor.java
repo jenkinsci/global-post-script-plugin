@@ -4,6 +4,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.MissingPropertyException;
 import hudson.Util;
 import hudson.model.TaskListener;
+import jenkins.model.Jenkins;
 import org.codehaus.plexus.util.FileUtils;
 
 import javax.script.ScriptContext;
@@ -48,7 +49,7 @@ public class ScriptExecutor {
     public void executeGroovy(File script) {
         try {
             String scriptContent = getScriptContent(script);
-            GroovyShell shell = new GroovyShell();
+            GroovyShell shell = new GroovyShell(Jenkins.getInstance().getPluginManager().uberClassLoader);
             for (Map.Entry<String, String> entry : variables.entrySet()) {
                 shell.setVariable(entry.getKey(), entry.getValue());
             }
@@ -67,7 +68,7 @@ public class ScriptExecutor {
         ScriptEngineManager sem = null;
         ScriptEngine engine = null;
         try {
-            sem = new ScriptEngineManager(this.getClass().getClassLoader());
+            sem = new ScriptEngineManager(Jenkins.getInstance().getPluginManager().uberClassLoader);
             engine = sem.getEngineByExtension("py");
             if (null != engine) {
                 ScriptContext context = new SimpleScriptContext();
