@@ -9,3 +9,6 @@
 /work
 /target
 /.idea
+/.settings/
+/.classpath
+/.project
