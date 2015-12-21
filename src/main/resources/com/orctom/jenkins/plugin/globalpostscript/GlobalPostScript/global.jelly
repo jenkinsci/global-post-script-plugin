@@ -8,6 +8,7 @@
                 <f:option value="SUCCESS" selected="${'SUCCESS' == instance.runCondition}">Only if build is stable</f:option>
                 <f:option value="UNSTABLE" selected="${'UNSTABLE' == instance.runCondition}">Even if the build is unstable</f:option>
                 <f:option value="FAILURE" selected="${'FAILURE' == instance.runCondition}">Even if the build fails</f:option>
+                <f:option value="ABORTED" selected="${'ABORTED' == instance.runCondition}">Always run, even if the job was aborted</f:option>
             </select>
         </f:entry>
     </f:section>
