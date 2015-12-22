@@ -1,5 +1,7 @@
 # global-post-script-plugin [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/global-post-script-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/global-post-script-plugin/)
-Execute a global configured groovy/python script after each build of each job managed by the Jenkins
+Execute a global configured groovy script after each build of each job managed by the Jenkins
+
+**NOTICE: python scripts supports removed since 1.0.0**
 
 See also: https://wiki.jenkins-ci.org/display/JENKINS/Global+Post+Script+Plugin
 
@@ -43,7 +45,10 @@ An extra object is available as groovy variables: `manager`, provided 4 methods:
 ### Groovy
 Sample:
 ```groovy
-out.println("deploy to: $deploy_targets")
+out.println("repo to: $GIT_URL")
+job = hudson.model.Hudson.instance.getItem("TEST2")
+build = job.getLastBuild()
+println build
 ```
 
 Sample:
@@ -107,27 +112,6 @@ if (manager.isVar("deploy") && manager.isNotBlankVar("deploy_targets") && "true"
         manager.addBadge("server.png", "[SQ: " + deploy_targets + "]")
     }
 }
-```
-
-### Python (Jython)
-Sample:
-```python
-print 'deploy to: ' + deploy_targets + ", " +  manager.getCause()
-```
-
-Sample:
-```python
-if 'variable_name' in locals():
-    ...
-```
-
-Sample:
-```python
-str = 'deploy to: '
-if manager.isVar('deploy_targets'):
-    str += deploy_targets
-str += ", " + manager.getCause()
-print str
 ```
 
 ### bat/sh

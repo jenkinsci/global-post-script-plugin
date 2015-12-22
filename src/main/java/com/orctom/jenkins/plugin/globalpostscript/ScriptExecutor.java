@@ -37,8 +37,6 @@ public class ScriptExecutor {
 		String ext = FileUtils.getExtension(script.getAbsolutePath());
 		if ("groovy".equalsIgnoreCase(ext) || "gvy".equalsIgnoreCase(ext) || "gs".equalsIgnoreCase(ext) || "gsh".equalsIgnoreCase(ext)) {
 			executeGroovy(script);
-		} else if ("py".equalsIgnoreCase(ext) || "jy".equalsIgnoreCase(ext)) {
-			executePython(script);
 		} else if ("sh".equalsIgnoreCase(ext)) {
 			executeScript("sh", script);
 		} else if ("bat".equalsIgnoreCase(ext)) {
@@ -61,31 +59,6 @@ public class ScriptExecutor {
 			shell.evaluate(scriptContent);
 		} catch (MissingPropertyException e) {
 			println("[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());
-		} catch (Throwable e) {
-			e.printStackTrace();
-			println("[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());
-		}
-	}
-
-	public void executePython(File script) {
-		ScriptEngineManager sem = null;
-		ScriptEngine engine = null;
-		try {
-			sem = new ScriptEngineManager(getParentClassloader());
-			engine = sem.getEngineByExtension("py");
-			if (null != engine) {
-				ScriptContext context = new SimpleScriptContext();
-				StringWriter writer = new StringWriter();
-				for (Map.Entry<String, String> entry : variables.entrySet()) {
-					context.setAttribute(entry.getKey(), entry.getValue(), ScriptContext.ENGINE_SCOPE);
-				}
-				context.setAttribute("manager", manager, ScriptContext.ENGINE_SCOPE);
-				context.setWriter(writer);
-				engine.eval(getScriptContent(script), context);
-				println(writer.toString());
-			} else {
-				println("[ERROR] Failed to load python interpreter, please use Grovvy script in the meanwhile");
-			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 			println("[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());

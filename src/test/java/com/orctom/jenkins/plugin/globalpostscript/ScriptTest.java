@@ -81,30 +81,6 @@ public class ScriptTest {
     }
 
     @Test
-    public void testExecutePython() {
-        File script = new File(ClassLoader.getSystemResource("test.py").getPath());
-        System.out.println("script: " + script);
-        String expected = "dropdeploy to: server1, dummy cause";
-        executor.executePython(script);
-        String actual = StringUtils.trim(listener.getLogger().toString());
-        System.out.println("expected: " + expected);
-        System.out.println("actual  : " + actual);
-        Assert.assertEquals(expected, actual);
-    }
-
-    @Test
-    public void testExecutePython2() {
-        File script = new File(ClassLoader.getSystemResource("test2.py").getPath());
-        System.out.println("script: " + script);
-        String expected = "dropdeploy to: server1, dummy cause";
-        executor.executePython(script);
-        String actual = StringUtils.trim(listener.getLogger().toString());
-        System.out.println("expected: " + expected);
-        System.out.println("actual  : " + actual);
-        Assert.assertEquals(expected, actual);
-    }
-
-    @Test
     public void testExecuteGroovy() {
         File script = new File(ClassLoader.getSystemResource("test.groovy").getPath());
         System.out.println("script: " + script);

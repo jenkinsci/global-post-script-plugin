@@ -3,10 +3,13 @@ package com.orctom.jenkins.plugin.globalpostscript;
 import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.Util;
 import hudson.console.ModelHyperlinkNote;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
+import hudson.util.ComboBoxModel;
 import hudson.util.FormValidation;
+import hudson.util.TextFile;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.net.URLCodec;
@@ -19,7 +22,10 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.servlet.ServletException;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +36,8 @@ import java.util.Map;
  */
 @Extension
 public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describable<GlobalPostScript> {
+
+	private static final String SCRIPT_FOLDER = File.separator + "global-post-script" + File.separator;
 
 	@Override
 	public void onCompleted(Run run, TaskListener listener) {
@@ -45,7 +53,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 		}
 
 		String script = getDescriptorImpl().getScript();
-		File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + "/global-post-script/", script);
+		File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + SCRIPT_FOLDER, script);
 		if (file.exists()) {
 			try {
 				BadgeManager manager = new BadgeManager(run, listener);
@@ -222,14 +230,36 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
 			load();
 		}
 
-		public FormValidation doCheckName(@QueryParameter String value) throws IOException, ServletException {
-			if (StringUtils.isEmpty(value)) {
+		public FormValidation doCheckScript(@QueryParameter("script") String name) throws IOException, ServletException {
+			if (StringUtils.isEmpty(name)) {
 				return FormValidation.error("Please set the script name");
 			}
-			if (!value.matches("[a-zA-Z0-9_\\-]+\\.\\w+")) {
-				return FormValidation.error("Please make sure it's a valid file name with extension. (matching '[a-zA-Z0-9_\\-]+\\.\\w+')");
+			if (!name.matches("[a-zA-Z0-9_\\-]+\\.\\w+")) {
+				return FormValidation.error("Please make sure it's a valid file name with extension");
 			}
 			return FormValidation.ok();
+		}
+
+		public ComboBoxModel doFillScriptItems() {
+			ComboBoxModel items = new ComboBoxModel();
+
+			File scriptFolder = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + SCRIPT_FOLDER);
+			FilenameFilter filter = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					String fileName = name.toLowerCase();
+					return new File(dir, name).isFile() && (
+							fileName.endsWith(".groovy") ||
+							fileName.endsWith(".gvy") ||
+							fileName.endsWith(".gy") ||
+							fileName.endsWith(".gsh") ||
+							fileName.endsWith(".bat") ||
+							fileName.endsWith(".sh")
+					);
+				}
+			};
+
+			Collections.addAll(items, scriptFolder.list(filter));
+			return items;
 		}
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
