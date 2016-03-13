@@ -1,12 +1,11 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
-import junit.framework.Assert;
+import com.orctom.jenkins.plugin.globalpostscript.model.URL;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
+ * url tests
  * Created by hao on 8/13/2014.
  */
 public class URLTest {

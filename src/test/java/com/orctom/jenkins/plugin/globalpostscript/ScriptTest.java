@@ -1,5 +1,6 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
+import com.orctom.jenkins.plugin.globalpostscript.runner.ScriptRunners;
 import hudson.model.TaskListener;
 import hudson.util.LogTaskListener;
 import org.apache.commons.lang.StringUtils;
@@ -16,68 +17,69 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * script tests
  * Created by hao on 6/26/2014.
  */
 public class ScriptTest {
 
-    private ScriptExecutor executor;
-    private TaskListener listener;
+    private Map<String, String> variables = new HashMap<String, String>();
+
+    private TaskListener listener = new LogTaskListener(Logger.getLogger(ScriptTest.class.getName()), Level.ALL) {
+
+        private PrintStream logger = new PrintStream(new ByteArrayOutputStream()) {
+            private StringBuilder logs = new StringBuilder();
+            @Override
+            public void println(String x) {
+                logs.append(x).append(System.getProperty("line.separator"));
+            }
+
+            @Override
+            public void print(String x) {
+                logs.append(x);
+            }
+
+            @Override
+            public String toString() {
+                return logs.toString();
+            }
+        };
+
+        @Override
+        public PrintStream getLogger() {
+            return logger;
+        }
+    };
+
+    private GlobalPostScript.BadgeManager manager = new GlobalPostScript.BadgeManager(null, null) {
+        @Override
+        public void addBadge(String icon, String text) {
+            System.out.println("addBadge: " + icon + ", " + text);
+        }
+
+        @Override
+        public void addShortText(String text) {
+            System.out.println("addShortText: " + text);
+        }
+
+        @Override
+        public void triggerJob(String jobName) {
+            System.out.println("triggerJob: " + jobName);
+        }
+
+        @Override
+        public void triggerRemoteJob(String jobTriggerUrl) {
+            System.out.println("triggerRemoteJob: " + jobTriggerUrl);
+        }
+
+        @Override
+        public String getCause() {
+            return "dummy cause";
+        }
+    };
 
     @Before
     public void before() {
-        Map<String, String> variables = new HashMap<String, String>();
         variables.put("dropdeploy_targets", "server1");
-        listener = new LogTaskListener(Logger.getLogger(ScriptTest.class.getName()), Level.ALL) {
-
-            private PrintStream logger = new PrintStream(new ByteArrayOutputStream()) {
-                private StringBuilder logs = new StringBuilder();
-                @Override
-                public void println(String x) {
-                    logs.append(x).append(System.getProperty("line.separator"));
-                }
-
-                @Override
-                public void print(String x) {
-                    logs.append(x);
-                }
-
-                @Override
-                public String toString() {
-                    return logs.toString();
-                }
-            };
-
-            @Override
-            public PrintStream getLogger() {
-                return logger;
-            }
-        };
-        executor = new ScriptExecutor(variables, listener, new GlobalPostScript.BadgeManager(null, null) {
-            @Override
-            public void addBadge(String icon, String text) {
-                System.out.println("addBadge: " + icon + ", " + text);
-            }
-
-            @Override
-            public void addShortText(String text) {
-                System.out.println("addShortText: " + text);
-            }
-
-            @Override
-            public void triggerJob(String jobName) {
-                System.out.println("triggerJob: " + jobName);
-            }
-
-            @Override
-            public void triggerRemoteJob(String jobTriggerUrl) {
-                System.out.println("triggerRemoteJob: " + jobTriggerUrl);
-            }
-
-            @Override
-            public String getCause() {
-                return "dummy cause";
-            }
-        });
     }
 
     @Test
@@ -85,7 +87,7 @@ public class ScriptTest {
         File script = new File(ClassLoader.getSystemResource("test.groovy").getPath());
         System.out.println("script: " + script);
         String expected = "dropdeploy to: server1";
-        executor.executeGroovy(script);
+        ScriptRunners.GROOVY.run(script, variables, manager, listener);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);
@@ -97,7 +99,7 @@ public class ScriptTest {
         File script = new File(ClassLoader.getSystemResource("test2.groovy").getPath());
         System.out.println("script: " + script);
         String expected = "dropdeploy to: server1";
-        executor.executeGroovy(script);
+        ScriptRunners.GROOVY.run(script, variables, manager, listener);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);
