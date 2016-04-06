@@ -25,8 +25,7 @@ public class ScriptContentLoader {
       scriptFileName = script.getName();
       scriptLastModified = modified;
 
-      String content = Util.loadFile(script);
-      scriptContent = Util.replaceMacro(content, variables);
+      scriptContent = Util.loadFile(script);
       isChanged = true;
     }
     return new ScriptContent(scriptContent, isChanged);
