@@ -17,11 +17,7 @@ import java.util.Map;
  */
 public class GroovyScriptRunner extends ScriptRunner {
 
-  private GroovyShell shell = null;
-  private Script script = null;
-
   public GroovyScriptRunner() {
-    shell = new GroovyShell(getParentClassloader());
   }
 
   public void run(File scriptFile,
@@ -29,6 +25,7 @@ public class GroovyScriptRunner extends ScriptRunner {
                   GlobalPostScript.BadgeManager manager,
                   TaskListener listener) {
     try {
+      GroovyShell shell = new GroovyShell(getParentClassloader());
       for (Map.Entry<String, String> entry : variables.entrySet()) {
         shell.setVariable(entry.getKey(), entry.getValue());
       }
@@ -36,10 +33,7 @@ public class GroovyScriptRunner extends ScriptRunner {
       shell.setVariable("manager", manager);
 
       ScriptContent sc = ScriptContentLoader.getScriptContent(scriptFile, variables);
-      if (sc.isChanged()) {
-        script = shell.parse(sc.getContent());
-      }
-
+      Script script = shell.parse(sc.getContent());
       script.run();
     } catch (MissingPropertyException e) {
       println(listener, "[ERROR] Failed to execute: " + scriptFile.getName() + ", " + e.getMessage());
