@@ -20,18 +20,6 @@ public class GlobalPostScriptAction implements BuildBadgeAction {
     this.text = text;
   }
 
-  public String getIconFileName() {
-    return iconPath;
-  }
-
-  public String getDisplayName() {
-    return text;
-  }
-
-  public String getUrlName() {
-    return null;
-  }
-
   public static GlobalPostScriptAction createBadge(String icon, String text) {
     return new GlobalPostScriptAction(getIconPath(icon), text);
   }
@@ -48,5 +36,17 @@ public class GlobalPostScriptAction implements BuildBadgeAction {
     PluginWrapper wrapper = Jenkins.getInstance().getPluginManager().getPlugin(GlobalPostScriptPlugin.class);
     boolean pluginIconExists = (wrapper != null) && new File(wrapper.baseResourceURL.getPath() + "/img/" + icon).exists();
     return pluginIconExists ? "/plugin/global-post-script/img/" + icon : Jenkins.RESOURCE_PATH + "/images/16x16/" + icon;
+  }
+
+  public String getIconFileName() {
+    return iconPath;
+  }
+
+  public String getDisplayName() {
+    return text;
+  }
+
+  public String getUrlName() {
+    return null;
   }
 }

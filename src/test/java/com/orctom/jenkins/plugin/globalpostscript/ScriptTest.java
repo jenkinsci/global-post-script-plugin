@@ -1,6 +1,6 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
-import com.orctom.jenkins.plugin.globalpostscript.runner.ScriptRunners;
+import com.orctom.jenkins.plugin.globalpostscript.runner.GroovyScriptRunner;
 import hudson.model.TaskListener;
 import hudson.util.LogTaskListener;
 import org.apache.commons.lang.StringUtils;
@@ -87,7 +87,7 @@ public class ScriptTest {
         File script = new File(ClassLoader.getSystemResource("test.groovy").getPath());
         System.out.println("script: " + script);
         String expected = "dropdeploy to: server1";
-        ScriptRunners.GROOVY.run(script, variables, manager, listener);
+        new GroovyScriptRunner().run(script, variables, manager, listener);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);
@@ -99,7 +99,7 @@ public class ScriptTest {
         File script = new File(ClassLoader.getSystemResource("test2.groovy").getPath());
         System.out.println("script: " + script);
         String expected = "dropdeploy to: server1";
-        ScriptRunners.GROOVY.run(script, variables, manager, listener);
+        new GroovyScriptRunner().run(script, variables, manager, listener);
         String actual = StringUtils.trim(listener.getLogger().toString());
         System.out.println("expected: " + expected);
         System.out.println("actual  : " + actual);

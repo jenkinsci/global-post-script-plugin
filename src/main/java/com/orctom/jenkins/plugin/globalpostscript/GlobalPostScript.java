@@ -34,7 +34,15 @@ import java.util.Map;
 @Extension
 public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describable<GlobalPostScript> {
 
-  private static final String SCRIPT_FOLDER = File.separator + "global-post-script" + File.separator;
+  public static final String SCRIPT_FOLDER = File.separator + "global-post-script" + File.separator;
+
+  public static String getRemoteJobUrl(String jobUrl) {
+    if (jobUrl.contains("buildByToken")) {
+      return jobUrl.substring(0, jobUrl.indexOf("buildByToken")) + "job/" + jobUrl.replaceFirst(".*job=(\\w+)&.*", "$1");
+    } else {
+      return jobUrl.substring(0, jobUrl.lastIndexOf("/") + 1);
+    }
+  }
 
   @Override
   public void onCompleted(Run run, TaskListener listener) {
@@ -71,6 +79,14 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
       e.printStackTrace();
       return null;
     }
+  }
+
+  public Descriptor<GlobalPostScript> getDescriptor() {
+    return getDescriptorImpl();
+  }
+
+  public DescriptorImpl getDescriptorImpl() {
+    return (DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(GlobalPostScript.class);
   }
 
   @SuppressWarnings("unchecked")
@@ -199,22 +215,6 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     private void println(String message) {
       listener.getLogger().println(message);
     }
-  }
-
-  public static String getRemoteJobUrl(String jobUrl) {
-    if (jobUrl.contains("buildByToken")) {
-      return jobUrl.substring(0, jobUrl.indexOf("buildByToken")) + "job/" + jobUrl.replaceFirst(".*job=(\\w+)&.*", "$1");
-    } else {
-      return jobUrl.substring(0, jobUrl.lastIndexOf("/") + 1);
-    }
-  }
-
-  public Descriptor<GlobalPostScript> getDescriptor() {
-    return getDescriptorImpl();
-  }
-
-  public DescriptorImpl getDescriptorImpl() {
-    return (DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(GlobalPostScript.class);
   }
 
   @Extension

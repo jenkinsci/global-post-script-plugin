@@ -1,7 +1,6 @@
 package com.orctom.jenkins.plugin.globalpostscript.model;
 
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.groovy.util.StringUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,12 +13,11 @@ import java.util.regex.Pattern;
  */
 public class URL {
 
+  public static final Pattern PATTERN = Pattern.compile("^(https?://)?((?:[\\w-]+\\.)+[\\w-]*(?::\\d+)?)(/[\\w\\/]*)*(?:\\?(.*))?(?:#([-a-z\\d_]+))?");
   private String protocol;
   private String host;
   private String uri;
   private Map<String, String> parameters = new LinkedHashMap<String, String>();
-
-  public static final Pattern PATTERN = Pattern.compile("^(https?://)?((?:[\\w-]+\\.)+[\\w-]*(?::\\d+)?)(/[\\w\\/]*)*(?:\\?(.*))?(?:#([-a-z\\d_]+))?");
 
   public URL(String url) {
     Matcher matcher = PATTERN.matcher(url);

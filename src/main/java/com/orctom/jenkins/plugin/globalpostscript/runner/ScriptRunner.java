@@ -1,6 +1,7 @@
 package com.orctom.jenkins.plugin.globalpostscript.runner;
 
 import com.orctom.jenkins.plugin.globalpostscript.GlobalPostScript;
+import groovy.lang.GroovyClassLoader;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 

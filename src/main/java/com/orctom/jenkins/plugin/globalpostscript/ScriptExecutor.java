@@ -1,6 +1,7 @@
 package com.orctom.jenkins.plugin.globalpostscript;
 
-import com.orctom.jenkins.plugin.globalpostscript.runner.ScriptRunners;
+import com.orctom.jenkins.plugin.globalpostscript.runner.GroovyScriptRunner;
+import com.orctom.jenkins.plugin.globalpostscript.runner.ShellScriptRunner;
 import hudson.model.TaskListener;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -28,9 +29,9 @@ public class ScriptExecutor {
     println("[INFO] -----------------------------------------------------");
     String ext = FileUtils.getExtension(scriptFile.getAbsolutePath());
     if ("groovy".equalsIgnoreCase(ext) || "gvy".equalsIgnoreCase(ext) || "gs".equalsIgnoreCase(ext) || "gsh".equalsIgnoreCase(ext)) {
-      ScriptRunners.GROOVY.run(scriptFile, variables, manager, listener);
+      new GroovyScriptRunner().run(scriptFile, variables, manager, listener);
     } else if ("sh".equalsIgnoreCase(ext) || "bat".equalsIgnoreCase(ext)) {
-      ScriptRunners.SHELL.run(scriptFile, variables, manager, listener);
+      new ShellScriptRunner().run(scriptFile, variables, manager, listener);
     } else {
       println("[ERROR] Script type not supported: " + ext + " | " + scriptFile.getName());
     }
