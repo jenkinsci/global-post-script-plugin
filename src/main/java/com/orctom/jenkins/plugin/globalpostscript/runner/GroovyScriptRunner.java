@@ -10,7 +10,6 @@ import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.util.Map;
 
@@ -72,6 +71,7 @@ public class GroovyScriptRunner extends ScriptRunner {
 
   protected static class JarFilter implements FilenameFilter {
     private static final String JAR_FILE_SUFFIX = ".jar";
+
     public boolean accept(File dir, String name) {
       return name.toLowerCase().endsWith(JAR_FILE_SUFFIX);
     }
