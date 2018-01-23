@@ -48,11 +48,6 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   public void onCompleted(Run run, TaskListener listener) {
     EnvVars envVars = getEnvVars(run, listener);
 
-    // This method also get executed for each sub-module in multi-module Maven project.
-    if (null == envVars || !envVars.containsKey("EXECUTOR_NUMBER")) {
-      return;
-    }
-
     if (run.getResult().isWorseThan(getDescriptorImpl().getResultCondition())) {
       return;
     }
