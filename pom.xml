@@ -8,7 +8,7 @@
         <relativePath />
     </parent>
   <artifactId>global-post-script</artifactId>
-  <version>1.1.4</version>
+  <version>1.1.4-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Global+Post+Script+Plugin</url>
@@ -18,7 +18,7 @@
     <url>https://github.com/jenkinsci/global-post-script-plugin/</url>
     <connection>scm:git:git@github.com:jenkinsci/global-post-script-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/global-post-script-plugin.git</developerConnection>
-    <tag>global-post-script-1.1.4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
