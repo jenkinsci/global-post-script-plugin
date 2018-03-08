@@ -26,15 +26,26 @@ public class ShellScriptRunner extends ScriptRunner {
       String extension = "." + FileUtils.getExtension(script.getPath());
       temp = FileUtils.createTempFile("global-post-script-", extension, null);
       FileUtils.fileWrite(temp, getScriptContent(script, variables).getContent());
-      Process p = Runtime.getRuntime().exec(new String[]{getExecutable(script), temp.getAbsolutePath()});
-      BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      StringBuilder builder = new StringBuilder();
-      String line;
-      while ((line = br.readLine()) != null) {
-        builder.append(line);
-        builder.append(System.getProperty("line.separator"));
+      String[] commands;
+      if (".sh".equals(extension)) {
+        commands = new String[]{getExecutable(script), temp.getAbsolutePath()};
+      } else {
+        commands = new String[]{temp.getAbsolutePath()};
       }
-      println(listener, builder.toString());
+      ProcessBuilder builder = new ProcessBuilder(commands);
+      Map<String, String> env = builder.environment();
+      for (Map.Entry<String, String> entry : variables.entrySet()) {
+        env.put(entry.getKey(), entry.getValue());
+      }
+      Process process = builder.start();
+
+      BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+      String line;
+      while ((line = reader.readLine()) != null) {
+        println(listener, line);
+      }
+
     } catch (Throwable e) {
       e.printStackTrace();
       println(listener, "[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());
@@ -45,7 +56,7 @@ public class ShellScriptRunner extends ScriptRunner {
     }
   }
 
-  public String getExecutable(File script) {
+  private String getExecutable(File script) {
     return FileUtils.getExtension(script.getAbsolutePath());
   }
 }
