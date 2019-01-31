@@ -1,7 +1,7 @@
 # global-post-script-plugin [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/global-post-script-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/global-post-script-plugin/)
 Execute a global configured groovy script after each build of each job managed by the Jenkins
 
-**NOTICE: python scripts supports removed since 1.0.0**
+**NOTICE: python script support removed as of 1.0.0**
 
 See also: https://wiki.jenkins-ci.org/display/JENKINS/Global+Post+Script+Plugin
 
