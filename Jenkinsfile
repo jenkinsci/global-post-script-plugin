@@ -1,0 +1,2 @@
+buildPlugin(configurations: buildPlugin.recommendedConfigurations())
+
