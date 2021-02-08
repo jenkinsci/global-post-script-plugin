@@ -1,3 +1,5 @@
+# [LOOK FOR NEW MAINTAINER]
+
 # global-post-script-plugin [![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/global-post-script-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/global-post-script-plugin/)
 Execute a global configured groovy script after each build of each job managed by the Jenkins
 
