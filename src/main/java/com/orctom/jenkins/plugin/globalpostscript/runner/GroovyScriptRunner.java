@@ -50,8 +50,13 @@ public class GroovyScriptRunner extends ScriptRunner {
     return getGroovyClassloader(libFolder);
   }
 
-  protected ClassLoader getGroovyClassloader(File libFolder) {
+  private GroovyClassLoader getGroovyClassloaderFromParent() {
     GroovyClassLoader cl = new GroovyClassLoader(getParentClassloader());
+    return cl;
+  }
+
+  protected ClassLoader getGroovyClassloader(File libFolder) {
+    GroovyClassLoader cl = getGroovyClassloaderFromParent();
     if (!libFolder.exists() || !libFolder.isDirectory()) {
       return cl;
     }
