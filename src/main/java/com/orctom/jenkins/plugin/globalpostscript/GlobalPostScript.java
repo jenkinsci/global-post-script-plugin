@@ -48,7 +48,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   public void onCompleted(Run run, TaskListener listener) {
     EnvVars envVars = getEnvVars(run, listener);
 
-    if (run.getResult().isWorseThan(getDescriptorImpl().getResultCondition())) {
+    Result result = run.getResult();
+    if (result == null || result.isWorseThan(getDescriptorImpl().getResultCondition())) {
       return;
     }
 
@@ -68,7 +69,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   private EnvVars getEnvVars(Run run, TaskListener listener) {
     try {
       EnvVars envVars = run.getEnvironment(listener);
-      envVars.put("BUILD_RESULT", run.getResult().toString());
+      Result result = run.getResult();
+      envVars.put("BUILD_RESULT", result == null ? "ongoing" : result.toString());
       return envVars;
     } catch (Throwable e) {
       e.printStackTrace();
@@ -149,9 +151,9 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
               job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
               "#" + job.getNextBuildNumber());
           if (scheduled) {
-            println(hudson.tasks.Messages.BuildTrigger_Triggering(name));
+            println("Triggering " + name);
           } else {
-            println(hudson.tasks.Messages.BuildTrigger_InQueue(name));
+            println("In queue " + name);
           }
         }
       } else {
@@ -168,6 +170,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         jobURL.appendToParamValue("cause", new URLCodec().encode(getCause(), "UTF-8"));
         url = jobURL.getURL();
       } catch (Exception e) {
+        println("[WARNING] ignoring URL exception for " + jobTriggerUrl);
       }
 
       HttpClient client = new HttpClient();
@@ -176,7 +179,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         client.executeMethod(method);
         int statusCode = method.getStatusCode();
         if (statusCode < 400) {
-          println(hudson.tasks.Messages.BuildTrigger_Triggering(jobUrl));
+          println("Triggering " + jobUrl);
         } else {
           println("[ERROR] Failed to trigger: " + jobUrl + " | " + statusCode);
         }
@@ -250,7 +253,10 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
       };
 
-      Collections.addAll(items, scriptFolder.list(filter));
+      String [] filteredFiles = scriptFolder.list(filter);
+      if (filteredFiles != null) {
+        Collections.addAll(items, filteredFiles);
+      }
       return items;
     }
 

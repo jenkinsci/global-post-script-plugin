@@ -7,6 +7,7 @@ import org.codehaus.plexus.util.FileUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static com.orctom.jenkins.plugin.globalpostscript.ScriptContentLoader.getScriptContent;
@@ -39,11 +40,11 @@ public class ShellScriptRunner extends ScriptRunner {
       }
       Process process = builder.start();
 
-      BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-      String line;
-      while ((line = reader.readLine()) != null) {
-        println(listener, line);
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          println(listener, line);
+        }
       }
 
     } catch (Throwable e) {
@@ -51,7 +52,9 @@ public class ShellScriptRunner extends ScriptRunner {
       println(listener, "[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());
     } finally {
       if (null != temp) {
-        temp.delete();
+        if (temp.delete()) {
+          println(listener, "[WARNING] Failed to delete temp file: " + temp.getName());
+        }
       }
     }
   }
