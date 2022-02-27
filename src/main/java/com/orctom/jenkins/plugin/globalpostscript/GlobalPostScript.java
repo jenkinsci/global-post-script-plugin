@@ -48,7 +48,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   public void onCompleted(Run run, TaskListener listener) {
     EnvVars envVars = getEnvVars(run, listener);
 
-    if (run.getResult().isWorseThan(getDescriptorImpl().getResultCondition())) {
+    Result result = run.getResult();
+    if (result == null || result.isWorseThan(getDescriptorImpl().getResultCondition())) {
       return;
     }
 
@@ -68,7 +69,8 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   private EnvVars getEnvVars(Run run, TaskListener listener) {
     try {
       EnvVars envVars = run.getEnvironment(listener);
-      envVars.put("BUILD_RESULT", run.getResult().toString());
+      Result result = run.getResult();
+      envVars.put("BUILD_RESULT", result == null ? "ongoing" : result.toString());
       return envVars;
     } catch (Throwable e) {
       e.printStackTrace();
