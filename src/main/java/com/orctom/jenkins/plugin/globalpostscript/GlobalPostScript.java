@@ -253,7 +253,10 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
       };
 
-      Collections.addAll(items, scriptFolder.list(filter));
+      String [] filteredFiles = scriptFolder.list(filter);
+      if (filteredFiles != null) {
+        Collections.addAll(items, filteredFiles);
+      }
       return items;
     }
 
