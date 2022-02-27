@@ -170,6 +170,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         jobURL.appendToParamValue("cause", new URLCodec().encode(getCause(), "UTF-8"));
         url = jobURL.getURL();
       } catch (Exception e) {
+        println("[WARNING] ignoring URL exception for " + jobTriggerUrl);
       }
 
       HttpClient client = new HttpClient();
