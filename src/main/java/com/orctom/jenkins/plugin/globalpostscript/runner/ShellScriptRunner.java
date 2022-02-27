@@ -51,7 +51,9 @@ public class ShellScriptRunner extends ScriptRunner {
       println(listener, "[ERROR] Failed to execute: " + script.getName() + ", " + e.getMessage());
     } finally {
       if (null != temp) {
-        temp.delete();
+        if (temp.delete()) {
+          println(listener, "[WARNING] Failed to delete temp file: " + temp.getName());
+        }
       }
     }
   }
