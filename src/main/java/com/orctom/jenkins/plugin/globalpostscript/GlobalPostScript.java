@@ -149,9 +149,9 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
               job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
               "#" + job.getNextBuildNumber());
           if (scheduled) {
-            println(hudson.tasks.Messages.BuildTrigger_Triggering(name));
+            println("Triggering " + name);
           } else {
-            println(hudson.tasks.Messages.BuildTrigger_InQueue(name));
+            println("In queue " + name);
           }
         }
       } else {
@@ -176,7 +176,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         client.executeMethod(method);
         int statusCode = method.getStatusCode();
         if (statusCode < 400) {
-          println(hudson.tasks.Messages.BuildTrigger_Triggering(jobUrl));
+          println("Triggering " + jobUrl);
         } else {
           println("[ERROR] Failed to trigger: " + jobUrl + " | " + statusCode);
         }
