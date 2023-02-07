@@ -226,6 +226,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     }
 
     public FormValidation doCheckScript(@QueryParameter("script") String name) throws IOException, ServletException {
+      Jenkins.get().checkPermission(Jenkins.ADMINISTER);
       if (StringUtils.isEmpty(name)) {
         return FormValidation.error("Please set the script name");
       }
