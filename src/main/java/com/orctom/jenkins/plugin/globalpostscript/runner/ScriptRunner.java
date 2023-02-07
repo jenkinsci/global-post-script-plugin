@@ -1,7 +1,6 @@
 package com.orctom.jenkins.plugin.globalpostscript.runner;
 
 import com.orctom.jenkins.plugin.globalpostscript.GlobalPostScript;
-import groovy.lang.GroovyClassLoader;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 
@@ -24,9 +23,10 @@ public abstract class ScriptRunner {
   }
 
   protected ClassLoader getParentClassloader() {
-    if (null != Jenkins.getInstance()) {
-      return Jenkins.getInstance().getPluginManager().uberClassLoader;
-    } else {
+    try {
+      return Jenkins.get().getPluginManager().uberClassLoader;
+    }
+    catch (IllegalStateException e){
       return Thread.currentThread().getContextClassLoader();
     }
   }

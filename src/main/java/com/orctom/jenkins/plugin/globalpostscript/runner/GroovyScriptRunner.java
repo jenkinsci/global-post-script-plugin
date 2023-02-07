@@ -42,11 +42,14 @@ public class GroovyScriptRunner extends ScriptRunner {
   }
 
   protected ClassLoader getGroovyClassloader() {
-    if (null == Jenkins.getInstance()) {
+    try {
+      Jenkins.get();
+    }
+    catch (IllegalStateException e){
       return getParentClassloader();
     }
-
-    File libFolder = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + GlobalPostScript.SCRIPT_FOLDER, "lib");
+    
+    File libFolder = new File(Jenkins.get().getRootDir().getAbsolutePath() + GlobalPostScript.SCRIPT_FOLDER, "lib");
     return getGroovyClassloader(libFolder);
   }
 
