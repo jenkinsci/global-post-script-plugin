@@ -12,9 +12,12 @@ import hudson.util.FormValidation;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -173,11 +176,11 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         println("[WARNING] ignoring URL exception for " + jobTriggerUrl);
       }
 
-      HttpClient client = new HttpClient();
-      HttpMethod method = new GetMethod(url);
+      CloseableHttpClient client = HttpClients.createDefault();
+      HttpGet method = new HttpGet(url);
       try {
-        client.executeMethod(method);
-        int statusCode = method.getStatusCode();
+        CloseableHttpResponse response = client.execute(method);
+        int statusCode = response.getStatusLine().getStatusCode();
         if (statusCode < 400) {
           println("Triggering " + jobUrl);
         } else {
@@ -187,7 +190,11 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         e.printStackTrace();
         println("[ERROR] Failed to trigger: " + jobUrl + " | " + e.getMessage());
       } finally {
-        method.releaseConnection();
+        try {
+          client.close();
+        } catch (IOException e) {
+          println("[ERROR] Failed to close connection: " + jobUrl + " | " + e.getMessage());
+        }
       }
     }
 
