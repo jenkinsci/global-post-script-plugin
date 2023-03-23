@@ -25,6 +25,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.level>8</java.level>
     <jenkins.version>2.303.3</jenkins.version>
+    <apache-httpcomponents-client-4-api.version>4.5.14-150.v7a_b_9d17134a_5</apache-httpcomponents-client-4-api.version>
   </properties>
 
   <developers>
@@ -89,6 +90,11 @@
       <artifactId>junit</artifactId>
       <version>4.13.2</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>apache-httpcomponents-client-4-api</artifactId>
+      <version>${apache-httpcomponents-client-4-api.version}</version>
     </dependency>
   </dependencies>
 </project>
