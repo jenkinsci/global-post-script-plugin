@@ -57,7 +57,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     }
 
     String script = getDescriptorImpl().getScript();
-    File file = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + SCRIPT_FOLDER, script);
+    File file = new File(Jenkins.get().getRootDir().getAbsolutePath() + SCRIPT_FOLDER, script);
     if (file.exists()) {
       try {
         BadgeManager manager = new BadgeManager(run, listener);
@@ -86,7 +86,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
   }
 
   public DescriptorImpl getDescriptorImpl() {
-    return (DescriptorImpl) Jenkins.getInstance().getDescriptorOrDie(GlobalPostScript.class);
+    return (DescriptorImpl) Jenkins.get().getDescriptorOrDie(GlobalPostScript.class);
   }
 
   @SuppressWarnings("unchecked")
@@ -144,11 +144,11 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
       for (Map.Entry<String, String> entry : params.entrySet()) {
         newParams.add(new StringParameterValue(entry.getKey(), entry.getValue()));
       }
-      AbstractProject job = Jenkins.getInstance().getItem(jobName, run.getParent().getParent(), AbstractProject.class);
+      AbstractProject job = Jenkins.get().getItem(jobName, run.getParent().getParent(), AbstractProject.class);
       if (null != job) {
         Cause cause = new Cause.UpstreamCause(run);
         boolean scheduled = job.scheduleBuild(job.getQuietPeriod(), cause, new ParametersAction(newParams));
-        if (Jenkins.getInstance().getItemByFullName(job.getFullName()) == job) {
+        if (Jenkins.get().getItemByFullName(job.getFullName()) == job) {
           String name = ModelHyperlinkNote.encodeTo(job) + "  "
               + ModelHyperlinkNote.encodeTo(
               job.getAbsoluteUrl() + job.getNextBuildNumber() + "/",
@@ -208,7 +208,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
         }
       }
 
-      String rootUrl = Jenkins.getInstance().getRootUrl();
+      String rootUrl = Jenkins.get().getRootUrl();
       if (StringUtils.isNotEmpty(rootUrl)) {
         cause.append("on ").append(rootUrl).append(" ");
       }
@@ -233,6 +233,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     }
 
     public FormValidation doCheckScript(@QueryParameter("script") String name) throws IOException, ServletException {
+      Jenkins.get().checkPermission(Jenkins.ADMINISTER);
       if (StringUtils.isEmpty(name)) {
         return FormValidation.error("Please set the script name");
       }
@@ -245,7 +246,7 @@ public class GlobalPostScript extends RunListener<Run<?, ?>> implements Describa
     public ComboBoxModel doFillScriptItems() {
       ComboBoxModel items = new ComboBoxModel();
 
-      File scriptFolder = new File(Jenkins.getInstance().getRootDir().getAbsolutePath() + SCRIPT_FOLDER);
+      File scriptFolder = new File(Jenkins.get().getRootDir().getAbsolutePath() + SCRIPT_FOLDER);
       FilenameFilter filter = new FilenameFilter() {
         public boolean accept(File dir, String name) {
           String fileName = name.toLowerCase();
