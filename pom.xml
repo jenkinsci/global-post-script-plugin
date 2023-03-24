@@ -4,11 +4,11 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.37</version>
+        <version>4.54</version>
         <relativePath />
     </parent>
   <artifactId>global-post-script</artifactId>
-  <version>1.1.5-SNAPSHOT</version>
+  <version>1.1.6-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <url>https://wiki.jenkins-ci.org/display/JENKINS/Global+Post+Script+Plugin</url>
@@ -23,8 +23,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.level>8</java.level>
-    <jenkins.version>2.303.3</jenkins.version>
+    <jenkins.version>2.375.2</jenkins.version>
   </properties>
 
   <developers>
@@ -65,7 +64,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5</version>
         <configuration>
           <goals>deploy</goals>
         </configuration>
